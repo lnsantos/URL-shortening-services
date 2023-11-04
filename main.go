@@ -1,10 +1,24 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"URLshortening/infra"
+	"URLshortening/presenter"
+	"URLshortening/server"
+	"github.com/gorilla/mux"
+	"log"
 )
 
 func main() {
-	fmt.Println("variavel encontrada", os.Getenv("MONGO_URI_URL_SHORTENING"))
+	client, err := infra.ClientConnect()
+
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	server.ServerStart(func(router *mux.Router) {
+		router.HandleFunc(
+			presenter.PostRegisterUrl{Endpoint: "/register/url"}.Create(client),
+		).Methods("POST")
+	})
 }
