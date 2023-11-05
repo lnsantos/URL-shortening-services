@@ -1,11 +1,10 @@
 package presenter
 
 import (
+	"URLshortening/core"
 	"URLshortening/domain"
 	"encoding/json"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"net/http"
 )
 
@@ -14,46 +13,49 @@ type PostRegisterUrl struct {
 }
 
 type RegisterUrlInput struct {
-	Original string `json:"original"`
+	Original string `json:"original,omitempty"`
+	Short    string `json:"short,omitempty"`
 }
 
-func (c PostRegisterUrl) Create(client *mongo.Client) (string, func(res http.ResponseWriter, req *http.Request)) {
-
-	if client == nil {
-		log.Fatal("client mongo is nil")
-		return "", nil
-	}
-
+func (c PostRegisterUrl) Create() (string, func(res http.ResponseWriter, req *http.Request)) {
 	return c.Endpoint, func(res http.ResponseWriter, req *http.Request) {
-
+		res.Header().Set("Content-Type", "application/json")
 		var input RegisterUrlInput
 
 		if err := json.NewDecoder(req.Body).Decode(&input); err != nil {
-			// customError := `{ "code": -1, "description": "failed in read body" }`
+			response, err := core.CreateErrorResponse(-1, "failed in read body", err)
 			res.WriteHeader(http.StatusBadRequest)
-			_, _ = res.Write([]byte(err.Error()))
+
+			if err == nil {
+				_, _ = res.Write(response)
+			}
+
 			return
 		}
-		fmt.Println(input.Original)
 
 		var url string = input.Original
 
-		short, errr := domain.RegisterNewUrl(client, url)
+		short, err := domain.RegisterNewUrl(url)
 
 		fmt.Println("datsyaysgaysgaysgas ", short)
 
-		if errr != nil {
-			customError := `{ "code": 02, "description": "failed in shorting url" }`
+		if err != nil {
+			response, err := core.CreateErrorResponse(2, "failed in shorting url", err)
 			res.WriteHeader(http.StatusBadRequest)
-			_, _ = res.Write([]byte(customError))
+
+			if err == nil {
+				_, _ = res.Write(response)
+			}
+
+			return
 		}
 
 		response := fmt.Sprintf(`{ "short": %v }`, short)
 		res.WriteHeader(http.StatusOK)
-		_, err := res.Write([]byte(response))
+		_, err = res.Write([]byte(response))
 
 		if err != nil {
-			fmt.Println("FINAL : ", err)
+			fmt.Println("unexpected err : ", err)
 		}
 	}
 }

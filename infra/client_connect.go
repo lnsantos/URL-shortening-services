@@ -8,9 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
+	"time"
 )
 
-func onDisconnectMongo(ctx context.Context, client *mongo.Client) {
+func OnDisconnectMongo(ctx context.Context, client *mongo.Client) {
 	if err := client.Disconnect(ctx); err != nil {
 		panic(err)
 	}
@@ -25,11 +26,10 @@ func ClientConnect() (*mongo.Client, error) {
 
 	var mongoUri = os.Getenv("MONGO_URI")
 
-	// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoUri))
 
-	// defer cancel()
-	// defer onDisconnectMongo(context.TODO(), client)
+	defer cancel()
 
 	err = client.Ping(context.TODO(), nil)
 

@@ -4,7 +4,6 @@ import (
 	"URLshortening/infra"
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type RegisterUrlDTO struct {
@@ -13,14 +12,17 @@ type RegisterUrlDTO struct {
 }
 
 func RegisterUrl(
-	c *mongo.Client,
 	record RegisterUrlDTO,
 ) error {
 
-	client := infra.MongoClient{Mc: c}
-	collection := client.GetCollectionShort()
+	client, err := infra.ClientConnect()
 
-	_, err := collection.InsertOne(
+	defer infra.OnDisconnectMongo(context.TODO(), client)
+
+	mongoClient := infra.MongoClient{Mc: client}
+	collection := mongoClient.GetCollectionShort()
+
+	_, err = collection.InsertOne(
 		context.TODO(),
 		record,
 	)
