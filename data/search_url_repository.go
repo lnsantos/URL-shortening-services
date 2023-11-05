@@ -22,7 +22,7 @@ func SearchUrlData(
 
 	mongoClient := infra.MongoClient{Mc: client}
 	collection := mongoClient.GetCollectionShort()
-	err = collection.FindOne(context.TODO(), filter).Decode(result)
+	err = collection.FindOne(context.TODO(), filter).Decode(&result)
 
 	if err != nil {
 		return RegisterUrlDTO{}, err

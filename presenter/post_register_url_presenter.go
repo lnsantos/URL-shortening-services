@@ -28,6 +28,8 @@ func (c PostRegisterUrl) Create() (string, func(res http.ResponseWriter, req *ht
 
 			if err == nil {
 				_, _ = res.Write(response)
+			} else {
+				fmt.Println("unexpected err in send response: ", err)
 			}
 
 			return
@@ -37,25 +39,38 @@ func (c PostRegisterUrl) Create() (string, func(res http.ResponseWriter, req *ht
 
 		short, err := domain.RegisterNewUrl(url)
 
-		fmt.Println("datsyaysgaysgaysgas ", short)
-
 		if err != nil {
 			response, err := core.CreateErrorResponse(2, "failed in shorting url", err)
 			res.WriteHeader(http.StatusBadRequest)
 
 			if err == nil {
 				_, _ = res.Write(response)
+			} else {
+				fmt.Println("unexpected err in send response: ", err)
+			}
+
+			return
+		}
+
+		if len(short) == 0 {
+			response, err := core.CreateErrorResponse(3, "url already registered", err)
+			res.WriteHeader(http.StatusNotAcceptable)
+
+			if err == nil {
+				_, _ = res.Write(response)
+			} else {
+				fmt.Println("unexpected err in send response: ", err)
 			}
 
 			return
 		}
 
 		response := fmt.Sprintf(`{ "short": %v }`, short)
-		res.WriteHeader(http.StatusOK)
+		res.WriteHeader(http.StatusCreated)
 		_, err = res.Write([]byte(response))
 
 		if err != nil {
-			fmt.Println("unexpected err : ", err)
+			fmt.Println("unexpected err in send response: ", err)
 		}
 	}
 }

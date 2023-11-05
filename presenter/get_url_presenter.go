@@ -30,6 +30,8 @@ func (c GetRegisterUrl) Create() (string, func(res http.ResponseWriter, req *htt
 
 			if err == nil {
 				_, _ = res.Write(response)
+			} else {
+				fmt.Println("unexpected err in send response: ", err)
 			}
 
 			return
@@ -40,7 +42,7 @@ func (c GetRegisterUrl) Create() (string, func(res http.ResponseWriter, req *htt
 		_, err = res.Write(response)
 
 		if err != nil {
-			fmt.Println("unexpected err : ", err)
+			fmt.Println("unexpected err in send response: ", err)
 		}
 	}
 }
