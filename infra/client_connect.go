@@ -14,6 +14,8 @@ import (
 func OnDisconnectMongo(ctx context.Context, client *mongo.Client) {
 	if err := client.Disconnect(ctx); err != nil {
 		panic(err)
+	} else {
+		fmt.Println("Client mongo is closed")
 	}
 }
 
