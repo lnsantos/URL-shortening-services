@@ -61,13 +61,12 @@ func (c PostRegisterUrl) Create() (string, func(res http.ResponseWriter, req *ht
 			} else {
 				fmt.Println("unexpected err in send response: ", err)
 			}
-
 			return
 		}
 
-		response := fmt.Sprintf(`{ "short": %v }`, short)
+		response, _ := json.Marshal(RegisterUrlInput{Short: short})
 		res.WriteHeader(http.StatusCreated)
-		_, err = res.Write([]byte(response))
+		_, err = res.Write(response)
 
 		if err != nil {
 			fmt.Println("unexpected err in send response: ", err)
