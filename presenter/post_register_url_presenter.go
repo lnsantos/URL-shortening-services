@@ -4,6 +4,7 @@ import (
 	"URLshortening/core"
 	"URLshortening/domain"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -31,7 +32,6 @@ func (c PostRegisterUrl) Create() (string, func(res http.ResponseWriter, req *ht
 			} else {
 				fmt.Println("unexpected err in send response: ", err)
 			}
-
 			return
 		}
 
@@ -52,24 +52,36 @@ func (c PostRegisterUrl) Create() (string, func(res http.ResponseWriter, req *ht
 			return
 		}
 
-		if len(short) == 0 {
-			response, err := core.CreateErrorResponse(3, "url already registered", err)
+		if short == "" {
+			response, err := core.CreateErrorResponse(3, "url already registered", errors.New(""))
 			res.WriteHeader(http.StatusNotAcceptable)
 
-			if err == nil {
-				_, _ = res.Write(response)
-			} else {
+			if err != nil {
 				fmt.Println("unexpected err in send response: ", err)
+				return
 			}
+
+			if _, err = res.Write(response); err != nil {
+				fmt.Println("unexpected err in send response: ", err)
+				return
+			}
+
 			return
 		}
 
-		response, _ := json.Marshal(RegisterUrlInput{Short: short})
+		responseData := RegisterUrlInput{Short: short, Original: url}
 		res.WriteHeader(http.StatusCreated)
-		_, err = res.Write(response)
 
-		if err != nil {
+		if response, err := json.Marshal(responseData); err != nil {
+			res.WriteHeader(http.StatusBadRequest)
 			fmt.Println("unexpected err in send response: ", err)
+		} else {
+			if write, err := res.Write(response); err != nil {
+				res.WriteHeader(http.StatusBadRequest)
+				fmt.Println("unexpected err in send response: ", err)
+			} else {
+				fmt.Println("registered with success ", write)
+			}
 		}
 	}
 }

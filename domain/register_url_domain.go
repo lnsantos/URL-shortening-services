@@ -3,12 +3,12 @@ package domain
 import (
 	"URLshortening/data"
 	"encoding/base64"
+	"fmt"
 )
 
 func RegisterNewUrl(
 	url string,
 ) (string, error) {
-
 	encode := base64.StdEncoding.EncodeToString([]byte(url))
 	record := data.RegisterUrlDTO{Original: url, Short: encode}
 
@@ -16,6 +16,7 @@ func RegisterNewUrl(
 		return "", err
 	}
 
+	fmt.Println("none equals in database ", record)
 	err := data.RegisterUrl(record)
 
 	return encode, err

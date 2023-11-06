@@ -39,8 +39,8 @@ func (c GetRegisterUrl) Create() (string, func(res http.ResponseWriter, req *htt
 
 		response, _ := json.Marshal(result)
 		res.WriteHeader(http.StatusOK)
-		_, err = res.Write(response)
-
+		write, err := res.Write(response)
+		fmt.Println(write)
 		if err != nil {
 			fmt.Println("unexpected err in send response: ", err)
 		}

@@ -14,7 +14,7 @@ type RegisterUrlDTO struct {
 func RegisterUrl(
 	record RegisterUrlDTO,
 ) error {
-
+	fmt.Println("start RegisterUrl")
 	client, err := infra.ClientConnect()
 
 	defer infra.OnDisconnectMongo(context.TODO(), client)
